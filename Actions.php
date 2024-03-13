@@ -14,18 +14,19 @@ Class Actions extends DBConnection{
     }
     function login(){
         global $conn;
-        extract($_POST);      
-        if ($conn->connect_errno) {
-            echo "Failed to connect to MySQL: " . $conn->connect_error;
-            exit();
-        }        
-        $sql = "SELECT * FROM admin_list where username = '{$username}' and `password` = '".md5($password)."' ";
+        extract($_POST);  
+        $hashed_password = md5($password);    
+       // if ($conn->connect_errno) {
+           // echo "Failed to connect to MySQL: " . $conn->connect_error;
+          //  exit();
+       // }        
+        $sql = "SELECT * FROM admin_list where username = '{$username}' and `password` =  '{$hashed_password}'";
         
         $result = $conn->query($sql);
         
         if(!$result){
             $resp['status'] = "failed";
-            $resp['msg'] = "Invalid username or password.";
+            $resp['msg'] = "Query execution failed: " . $conn->error;
         } else {
             $row = $result->fetch_assoc();        
             if(!$row){
@@ -40,7 +41,7 @@ Class Actions extends DBConnection{
                 }
             }
         }    
-        $conn->close();       
+       // $conn->close();       
         return json_encode($resp);
     }
     
@@ -48,6 +49,7 @@ Class Actions extends DBConnection{
         global $conn;
         extract($_POST);
         $hashed_password = md5($password);
+       
         $sql = "SELECT * FROM user_list WHERE username = '{$username}' AND `password` = '{$hashed_password}' ";
     
         $result = $conn->query($sql);
